@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:extension": "vite build --watch",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:extension": "bestzip dist.zip dist/"
   },
   "dependencies": {
     "bootstrap": "^5.3.2",
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
+    "bestzip": "^2.2.1",
     "vite": "^4.4.5"
   }
 }
