@@ -4,6 +4,21 @@ import Contents from './Contents.vue'
 
 const bookList = ref([])
 
+const setBookmarkBarTree = (tree) => {
+
+  if(tree && tree.length > 0) {
+    tree[0].children.forEach((item) => {
+      if(item.title == '북마크바') {
+        bookList.value = item.children
+      }
+    })
+  }
+}
+
+// const onRejected = (response) => {
+//   console.log(response)
+// }
+
 defineProps({
   msg: String,
 })
@@ -11,9 +26,9 @@ defineProps({
 const count = ref(0)
 
 onMounted(()=>{
-  for(var i=0; i<10; i++){
-    bookList.value.push({title:"title_" + i, link:"link_" + i})
-  }
+
+  chrome.bookmarks.getTree().then(setBookmarkBarTree);
+
 })
 
 </script>
