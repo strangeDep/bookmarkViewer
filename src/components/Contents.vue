@@ -1,18 +1,55 @@
 <script setup>
 
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
 
+// ----------------------------------------------------------------------------------
+// 상위 component 에서 전달 받은 props 정의
+// ----------------------------------------------------------------------------------
 const props = defineProps({
   bookList : Object
 })
 
-onMounted(()=>{
+// state 변수
+const isShow = ref(false) // display 여부
 
+
+// ----------------------------------------------------------------------------------
+// Content Show
+// ----------------------------------------------------------------------------------
+const showContents = () => {
+
+  // component 초기화 여기서 진행
+  isShow.value = true
+}
+
+// ----------------------------------------------------------------------------------
+// Content Hide
+// ----------------------------------------------------------------------------------
+const hideContents = () => {
+  isShow.value = false
+}
+
+// ----------------------------------------------------------------------------------
+// [Lifecycle Hook] 컴포넌트가 마운트된 후 호출될 콜백
+// ----------------------------------------------------------------------------------
+onMounted(()=>{
+  console.log('Contents onMounted()')
 })
+
+// ----------------------------------------------------------------------------------
+// 상위 component 에서 호출 가능한 함수 정의
+// ----------------------------------------------------------------------------------
+defineExpose({
+  showContents,
+  hideContents,
+})
+
 </script>
 
 <template>
-  <section class="py-5">
+
+  <!--isShow 가 true 일때만 화면에 표시-->
+  <section class="py-5" v-if="isShow">
     <div class="container px-4 px-lg-5 mt-5">
       <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
         <div class="col mb-5" v-for="(item, index) in bookList" :key="index">

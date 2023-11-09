@@ -1,11 +1,26 @@
 <script setup>
 import {onMounted, ref} from 'vue'
-import Contents from './Contents.vue'
+import Contents from '../components/Contents.vue'
 
-const bookList = ref([])
+// ----------------------------------------------------------------------------------
+// 상위 component 에서 전달 받은 props 정의
+// ----------------------------------------------------------------------------------
+defineProps({
+  msg: String,
+})
 
+// object 변수
+const contentObj = ref(null)    // Contents obj
+const { bookmarks } = chrome          // 북마크 object
+
+// data 변수
+const bookList = ref([])        // 북마크 리스트
+
+
+// ----------------------------------------------------------------------------------
+// 북마크 리스트 조회
+// ----------------------------------------------------------------------------------
 const setBookmarkBarTree = (tree) => {
-
   if(tree && tree.length > 0) {
     tree[0].children.forEach((item) => {
       if(item.title == '북마크바') {
@@ -13,21 +28,22 @@ const setBookmarkBarTree = (tree) => {
       }
     })
   }
+
+  return new Promise((resolve, reject) => {
+    resolve()
+  })
+
 }
 
-// const onRejected = (response) => {
-//   console.log(response)
-// }
+// ----------------------------------------------------------------------------------
+// [Lifecycle Hook] 컴포넌트가 마운트된 후 호출될 콜백
+// ----------------------------------------------------------------------------------
+onMounted(async ()=>{
+  console.log('BookmarkMain onMounted()')
+  await bookmarks.getTree().then(setBookmarkBarTree);
 
-defineProps({
-  msg: String,
-})
-
-const count = ref(0)
-
-onMounted(()=>{
-
-  chrome.bookmarks.getTree().then(setBookmarkBarTree);
+  // 하위 Contents component 호출
+  contentObj.value.showContents()
 
 })
 
@@ -73,7 +89,7 @@ onMounted(()=>{
     </div>
   </header>
   <!-- Section-->
-  <Contents :bookList="bookList"></Contents>
+  <Contents ref="contentObj" :bookList="bookList"></Contents>
   <!-- Footer-->
   <footer class="py-5 bg-dark">
     <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
