@@ -29,6 +29,8 @@ const setBookmarkBarTree = (tree) => {
     })
   }
 
+  console.log(bookList.value)
+
   return new Promise((resolve, reject) => {
     resolve()
   })
