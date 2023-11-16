@@ -1,6 +1,6 @@
 {
-  "name": "Vue extension",
-  "description": "My extension app made by Vue.js",
+  "name": "Bookmark Manager",
+  "description": "Bookmark Manager is a Chrome extension that allows you to manage your bookmarks in a more efficient way.",
   "version": "0.0.1",
   "manifest_version": 3,
   "action": {

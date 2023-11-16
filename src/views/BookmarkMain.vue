@@ -24,6 +24,7 @@ const setBookmarkBarTree = (tree) => {
   if(tree && tree.length > 0) {
     tree[0].children.forEach((item) => {
       if(item.title == '북마크바') {
+        console.log("bookmark root", item)
         bookList.value = item.children
       }
     })

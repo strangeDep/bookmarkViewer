@@ -96,13 +96,14 @@ defineExpose({
       <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
         <div class="col mb-5" v-for="(item, index) in childBookList" :key="index" @click="fnClick(item)">
           <div class="card h-100">
-            <div class="text-center">
-              <p v-if="item.children != undefined">폴더</p>
-
-              <p v-else>링크</p>
-            </div>
+<!--            <div class="text-center">-->
+<!--              <p v-if="item.children != undefined">폴더</p>-->
+<!--              <p v-else>링크</p>-->
+<!--            </div>-->
             <!-- Product image-->
-            <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
+<!--            <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />-->
+            <img v-if="item.children != undefined" class="card-img-top" src="../assets/blue-folder.png" alt="..." />
+            <img v-else class="card-img-top" :src="item.url + '/favicon.ico'" alt="..." />
             <!-- Product details-->
             <div class="card-body p-4">
               <div class="text-center">
