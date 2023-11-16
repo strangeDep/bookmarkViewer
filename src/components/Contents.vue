@@ -38,6 +38,20 @@ const showContents = () => {
 }
 
 // ----------------------------------------------------------------------------------
+// Image Get
+// ----------------------------------------------------------------------------------
+const getImageUrl = (name, ext) => {
+  return new URL(`../assets/${name}.${ext}`, import.meta.url).href
+}
+
+// ----------------------------------------------------------------------------------
+// Image Get
+// ----------------------------------------------------------------------------------
+const errorImg = (e) => {
+  e.target.src = getImageUrl('earth','png')
+}
+
+// ----------------------------------------------------------------------------------
 // Content Hide
 // ----------------------------------------------------------------------------------
 const hideContents = () => {
@@ -101,9 +115,9 @@ defineExpose({
 <!--              <p v-else>링크</p>-->
 <!--            </div>-->
             <!-- Product image-->
-<!--            <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />-->
-            <img v-if="item.children != undefined" class="card-img-top" src="../assets/blue-folder.png" alt="..." />
-            <img v-else class="card-img-top" :src="item.url + '/favicon.ico'" alt="..." />
+            <img v-if="item.children != undefined" class="card-img-top" :src="getImageUrl('blue-folder','png')" alt="..." />
+            <img v-else class="card-img-top" :src="item.url + '/favicon.ico'"
+                 alt="" @error="errorImg" />
             <!-- Product details-->
             <div class="card-body p-4">
               <div class="text-center">
@@ -114,10 +128,11 @@ defineExpose({
               </div>
             </div>
             <!-- Product actions-->
-            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-<!--              <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">{{item.link}}</a></div>-->
-              <button>수정</button>
-              <button>삭제</button>
+            <div class="card-footer pt-0 border-top-0 bg-transparent">
+              <div class="text-center d-flex">
+                <button type="button" class="btn btn-primary m-1">수정</button>
+                <button type="button" class="btn btn-primary m-1">삭제</button>
+              </div>
             </div>
           </div>
         </div>
@@ -138,9 +153,11 @@ defineExpose({
 
               </div></div>
             <!-- Product actions-->
-            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-              <button>등록</button>
-              <button>취소</button>
+            <div class="card-footer pt-0 border-top-0 bg-transparent">
+              <div class="text-center d-flex">
+                <button type="button" class="btn btn-primary m-1">등록</button>
+                <button type="button" class="btn btn-primary m-1">취소</button>
+              </div>
             </div>
           </div>
         </div>
