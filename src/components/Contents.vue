@@ -1,94 +1,105 @@
 <script setup>
 
-import {onMounted, ref} from "vue";
+import {onMounted, ref, computed} from "vue";
+import {useStore} from "vuex";
 
 // ----------------------------------------------------------------------------------
 // 상위 component 에서 전달 받은 props 정의
 // ----------------------------------------------------------------------------------
 const props = defineProps({
-  bookList : Object
+  searchTitle : String
 })
 
+// store
+const store = useStore()
+
+// object 변수
+const { bookmarks } = chrome          // 북마크 object
+
 // state 변수
-const isShow = ref(false) // display 여부
-const childBookList = ref([]) // 하위 자식 북마크 리스트
-const prevBookList = ref([]) // 상위 북마크
-const parentId = ref('1')
+const children = ref([])        // 현재 요소 자식 목록
+const pathList = ref([])        // 현재 위치
+const parentId = ref({})        // 부모 ID
 
-const insertBookmark = () => {
-
-  chrome.bookmarks.create({
-    'parentId': parentId.value,
-    'title': '가나다라',
-    'url': 'https://www.naver.com/',
-  });
-
-  childBookList.value = props.bookList
-}
+// const insertBookmark = () => {
+//
+//   chrome.bookmarks.create({
+//     'parentId': parentId.value,
+//     'title': '가나다라',
+//     'url': 'https://www.naver.com/',
+//   });
+//
+// }
 
 // ----------------------------------------------------------------------------------
 // Content Show
 // ----------------------------------------------------------------------------------
-const showContents = () => {
+const showContents = async () => {
 
-  // component 초기화 여기서 진행
-  isShow.value = true
+  // store 예시
+  // console.log(computed(() => store.getters.getQuickLaunch).value)
+  // store.dispatch('setQuickLaunchAction', rootList)
 
-  childBookList.value = props.bookList
+  // component 초기화
+  setChildrenById('1')
+  pathList.value.push({id: '1', path: '/root'})
+  parentId.value = '1'
+
 }
 
 // ----------------------------------------------------------------------------------
-// Image Get
+// 북마크 query 검색
 // ----------------------------------------------------------------------------------
-const getImageUrl = (name, ext) => {
-  return new URL(`../assets/${name}.${ext}`, import.meta.url).href
+const searchBookmarkByQuery = (str) => {
+
+  bookmarks.search(str, (results) => {
+    if(results.length > 0) {
+      console.log('searchBookmarkByQuery', results)
+      children.value = results
+    }
+  })
 }
 
 // ----------------------------------------------------------------------------------
-// Image Get
+// 북마크 Id 검색
 // ----------------------------------------------------------------------------------
-const errorImg = (e) => {
-  e.target.src = getImageUrl('earth','png')
-}
-
-// ----------------------------------------------------------------------------------
-// Content Hide
-// ----------------------------------------------------------------------------------
-const hideContents = () => {
-  isShow.value = false
+const setChildrenById = (id) => {
+  bookmarks.getSubTree(id, (results) => {
+    if(results.length > 0) {
+      console.log('getSubTree', results[0])
+      parentId.value = results[0].parentId
+      children.value = results[0].children
+    }
+  })
 }
 
 // ----------------------------------------------------------------------------------
 // 폴더/링크 요소 클릭
 // ----------------------------------------------------------------------------------
-const fnClick = (item) => {
-  console.log(item)
-  parentId.value = item.id
-  if(item.children != undefined){
-    prevBookList.value = childBookList.value
-    childBookList.value = item.children
-  }else{
+const clickItem = (item) => {
+  console.log('clickItem', item)
 
+  if(item.children != undefined){
+    setChildrenById(item.id)
+  } else {
+    let win = window.open(item.url, '_blank');
+    win.focus();
   }
+
 }
 
 // ----------------------------------------------------------------------------------
 // 뒤로가기 클릭
 // ----------------------------------------------------------------------------------
-const fnBackClick = () => {
-
-  if(childBookList.value == prevBookList.value) { // 폴더 안에 폴더
-    childBookList.value = props.bookList
-  } else {
-    childBookList.value = prevBookList.value
-  }
-  //childBookList.value = prevBookList.value
+const clickBack = () => {
+  console.log('clickBack')
+  setChildrenById(parentId.value)
 }
 
 // ----------------------------------------------------------------------------------
 // [Lifecycle Hook] 컴포넌트가 마운트된 후 호출될 콜백
 // ----------------------------------------------------------------------------------
-onMounted(()=>{
+onMounted(() => {
   console.log('Contents onMounted()')
 })
 
@@ -97,75 +108,62 @@ onMounted(()=>{
 // ----------------------------------------------------------------------------------
 defineExpose({
   showContents,
-  hideContents,
 })
+
 </script>
 
 <template>
 
-  <!--isShow 가 true 일때만 화면에 표시-->
-  <section class="py-5" v-if="isShow">
-    <button @click="fnBackClick" v-show="childBookList != props.bookList">뒤로가기</button>
-    <div class="container px-4 px-lg-5 mt-5">
-      <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-        <div class="col mb-5" v-for="(item, index) in childBookList" :key="index" @click="fnClick(item)">
-          <div class="card h-100">
-<!--            <div class="text-center">-->
-<!--              <p v-if="item.children != undefined">폴더</p>-->
-<!--              <p v-else>링크</p>-->
-<!--            </div>-->
-            <!-- Product image-->
-            <img v-if="item.children != undefined" class="card-img-top" :src="getImageUrl('blue-folder','png')" alt="..." />
-            <img v-else class="card-img-top" :src="item.url + '/favicon.ico'"
-                 alt="" @error="errorImg" />
-            <!-- Product details-->
-            <div class="card-body p-4">
-              <div class="text-center">
-                <!-- Product name-->
-              <h5 class="fw-bolder"><a :href="item.url" target="_blank">{{item.title}}</a></h5><!--새 창 띄워서 이동-->
-                <!-- Product price-->
+  <ol class="breadcrumb text-big container-p-x py-3 m-0">
+    <!--경로-->
+    <div v-for="(item, index) in pathList" :key="index">
+      <li class="breadcrumb-item" :class="{'active':index == pathList.length - 1}">
+        <a href="javascript:void(0)">{{item.path}}</a>
+      </li>
+    </div>
+  </ol>
 
-              </div>
-            </div>
-            <!-- Product actions-->
-            <div class="card-footer pt-0 border-top-0 bg-transparent">
-              <div class="text-center d-flex">
-                <button type="button" class="btn btn-primary m-1">수정</button>
-                <button type="button" class="btn btn-primary m-1">삭제</button>
-              </div>
-            </div>
-          </div>
-        </div>
-<!--        /////////////////-->
-        <div class="col mb-5">
-          <div class="card h-100">
-            <div class="text-center">
-              <p>추가</p>
-            </div>
-            <!-- Product image-->
-            <img class="card-img-top" src="../assets/plus.png" alt="..." @click="insertBookmark"/>
-            <!-- Product details-->
-            <div class="card-body p-4">
-              <div class="text-center">
-                <!-- Product name-->
-<!--                <h5 class="fw-bolder">추가</h5>-->
-                <!-- Product price-->
+  <hr class="m-3" />
 
-              </div></div>
-            <!-- Product actions-->
-            <div class="card-footer pt-0 border-top-0 bg-transparent">
-              <div class="text-center d-flex">
-                <button type="button" class="btn btn-primary m-1">등록</button>
-                <button type="button" class="btn btn-primary m-1">취소</button>
-              </div>
-            </div>
-          </div>
+  <div class="file-manager-container file-manager-col-view">
+
+    <div class="file-manager-row-header">
+      <div class="file-item-name pb-2">Filename</div>
+      <div class="file-item-changed pb-2">Changed</div>
+    </div>
+
+    <!--뒤로가기-->
+    <div class="file-item">
+      <div class="file-item-icon file-item-level-up fas fa-level-up-alt text-secondary" @click="clickBack"></div>
+      <a href="javascript:void(0)" class="file-item-name">
+        ..
+      </a>
+    </div>
+
+    <!--북마크 목록-->
+    <div class="file-item" v-for="(item, index) in children" :key="index" @click="clickItem(item)">
+
+      <div v-if="item.children != undefined" class="file-item-icon far fa-folder text-secondary"></div>
+      <div v-else class="file-item-icon fas fa-external-link-alt text-secondary"></div>
+
+      <a href="javascript:void(0)" class="file-item-name">
+        {{item.title}}
+      </a>
+      <div class="file-item-actions btn-group">
+        <button type="button" class="btn btn-default btn-sm rounded-pill icon-btn borderless md-btn-flat hide-arrow dropdown-toggle" data-toggle="dropdown"><i class="ion ion-ios-more"></i></button>
+        <div class="dropdown-menu dropdown-menu-right">
+          <a class="dropdown-item" href="javascript:void(0)">Rename</a>
+          <a class="dropdown-item" href="javascript:void(0)">Move</a>
+          <a class="dropdown-item" href="javascript:void(0)">Copy</a>
+          <a class="dropdown-item" href="javascript:void(0)">Remove</a>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+
 </template>
 
 <style scoped>
+@import url('../assets/css/file_manager.css');
 
 </style>

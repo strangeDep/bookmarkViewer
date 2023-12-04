@@ -1,6 +1,6 @@
 {
-  "name": "Bookmark Manager",
-  "description": "Bookmark Manager is a Chrome extension that allows you to manage your bookmarks in a more efficient way.",
+  "name": "Bookmark Viewer",
+  "description": "북마크 관리 확장 프로그램",
   "version": "0.0.1",
   "manifest_version": 3,
   "action": {
@@ -11,5 +11,11 @@
   ],
   "chrome_url_overrides": {
     "newtab": "index.html"
+  },
+  "icons": {
+    "16": "icon-bookmark-16.png",
+    "32": "icon-bookmark-32.png",
+    "48": "icon-bookmark-64.png",
+    "128": "icon-bookmark-128.png"
   }
 }

@@ -3,7 +3,7 @@ import BookmarkMain from './views/BookmarkMain.vue'
 </script>
 
 <template>
-    <BookmarkMain msg="가보자고" />
+    <BookmarkMain msg="Bookmark Viewer" />
 </template>
 
 <style scoped>
